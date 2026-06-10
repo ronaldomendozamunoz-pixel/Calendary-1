@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="es" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing Calendar Pro - SaaS Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#2563EB',
+                            dark1: '#1E293B',
+                            dark2: '#0F172A',
+                            lightBg: '#F8FAFC',
+                            success: '#10B981',
+                            warning: '#F59E0B',
+                            danger: '#EF4444'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+        }
+
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        /* Colores dinámicos de Plataformas */
+        .platform-dot-facebook { background-color: #1877F2; }
+        .platform-dot-instagram { background-color: #E1306C; }
+        .platform-dot-tiktok { background-color: #000000; }
+        .platform-dot-youtube { background-color: #FF0000; }
+        .platform-dot-linkedin { background-color: #0077B5; }
+        .platform-dot-blog { background-color: #10B981; }
+        .platform-dot-email { background-color: #F59E0B; }
+
+        .dark .platform-dot-tiktok { background-color: #FFFFFF; color: #000; }
+
+        /* Drag & Drop Visual cues */
+        .calendar-day.drag-over {
+            background-color: rgba(37, 99, 235, 0.15) !important;
+            border: 2px dashed #2563EB !important;
+        }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] text-[#1E293B] dark:bg-[#0F172A] dark:text-[#F8FAFC] min-h-screen flex overflow-hidden">
+
+    <aside class="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] flex flex-col justify-between transition-all duration-300 z-30 fixed h-full lg:static lg:translate-x-0 -translate-x-full" id="sidebar">
+        <div class="p-6">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-blue to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-md shadow-blue-500/20">
+                    M
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-none">MktCalendar</h1>
+                    <span class="text-xs text-slate-400 font-medium">Pro Enterprise</span>
+                </div>
+            </div>
+
+            <nav class="space-y-1">
+                <button onclick="App.switchSection('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all bg-brand-blue text-white shadow-lg shadow-blue-500/10">
+                    <i class="fa-solid Nav-icon fa-chart-pie w-5 text-center"></i> Dashboard
+                </button>
+                <button onclick="App.switchSection('campanias')" id="nav-campanias" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="fa-solid Nav-icon fa-layer-group w-5 text-center"></i> Campañas
+                </button>
+                <button onclick="App.switchSection('contenidos')" id="nav-contenidos" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="fa-solid Nav-icon fa-photo-film w-5 text-center"></i> Contenidos
+                </button>
+                <button onclick="App.switchSection('calendario')" id="nav-calendario" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="fa-solid Nav-icon fa-calendar-alt w-5 text-center"></i> Calendario
+                </button>
+                <button onclick="App.switchSection('reportes')" id="nav-reportes" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="fa-solid Nav-icon fa-chart-line w-5 text-center"></i> Rendimiento
+                </button>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-slate-200 dark:border-slate-800">
+            <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900">
+                <div class="flex items-center gap-3">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Avatar" class="w-9 h-9 rounded-full object-cover">
+                    <div class="overflow-hidden w-28">
+                        <p class="text-xs font-bold truncate">Lic. Juan Pérez</p>
+                        <p class="text-[10px] text-slate-400 truncate">Marketing Manager</p>
+                    </div>
+                </div>
+                <button onclick="App.toggleTheme()" class="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:block"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col overflow-hidden relative w-full lg:pl-0">
+        
+        <header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-[#1E293B]/70 backdrop-blur-md px-6 flex items-center justify-between z-20">
+            <div class="flex items-center gap-4 flex-1">
+                <button onclick="App.toggleSidebar()" class="lg:hidden text-slate-600 dark:text-slate-300 text-xl">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="relative w-full max-w-md hidden md:block">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="globalSearch" oninput="App.handleGlobalSearch(this.value)" placeholder="Buscar campañas, contenidos o responsables..." class="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:border-brand-blue dark:focus:border-brand-blue transition-all">
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="flex gap-2">
+                    <button onclick="App.exportToExcel()" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                        <i class="fa-solid fa-file-excel text-emerald-600"></i> <span class="hidden sm:inline">Excel</span>
+                    </button>
+                    <button onclick="window.print()" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                        <i class="fa-solid fa-file-pdf text-rose-600"></i> <span class="hidden sm:inline">Imprimir/PDF</span>
+                    </button>
+                </div>
+                <div class="h-6 w-[1px] bg-slate-200 dark:border-slate-700"></div>
+                <div class="relative">
+                    <button class="w-9 h-9 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 relative">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-brand-danger"></span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-6 space-y-6" id="main-content-viewport">
+            
+            <section id="section-dashboard" class="space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">Resumen de Performance</h2>
+                        <p class="text-sm text-slate-400">Analítica general de tus campañas y contenidos integrados</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div class="glass-card p-5 rounded-2xl">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs text-slate-400 font-semibold tracking-wide uppercase">Total Campañas</span>
+                            <span class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-brand-blue flex items-center justify-center text-xs"><i class="fa-solid fa-layer-group"></i></span>
+                        </div>
+                        <h3 class="text-2xl font-bold" id="kpi-total-campanias">0</h3>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs text-slate-400 font-semibold tracking-wide uppercase">Campañas Activas</span>
+                            <span class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-brand-success flex items-center justify-center text-xs"><i class="fa-solid fa-bolt"></i></span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-brand-success" id="kpi-activas-campanias">0</h3>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs text-slate-400 font-semibold tracking-wide uppercase">Total Contenidos</span>
+                            <span class="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-500 flex items-center justify-center text-xs"><i class="fa-solid fa-photo-film"></i></span>
+                        </div>
+                        <h3 class="text-2xl font-bold" id="kpi-total-contenidos">0</h3>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs text-slate-400 font-semibold tracking-wide uppercase">Publicados</span>
+                            <span class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 flex items-center justify-center text-xs"><i class="fa-solid fa-circle-check"></i></span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-indigo-500" id="kpi-publicados-contenidos">0</h3>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl col-span-2 lg:col-span-1">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs text-slate-400 font-semibold tracking-wide uppercase">Programados</span>
+                            <span class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-brand-warning flex items-center justify-center text-xs"><i class="fa-solid fa-clock"></i></span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-brand-warning" id="kpi-programados-contenidos">0</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <div class="glass-card p-5 rounded-2xl">
+                        <h4 class="text-sm font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-bar text-brand-blue"></i> Contenidos por Plataforma</h4>
+                        <div class="h-64"><canvas id="chartPlataformas"></canvas></div>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl">
+                        <h4 class="text-sm font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-pie text-brand-warning"></i> Distribución por Estado</h4>
+                        <div class="h-64 flex justify-center"><canvas id="chartEstados"></canvas></div>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl">
+                        <h4 class="text-sm font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-line text-brand-success"></i> Histórico de Publicaciones (Mensual)</h4>
+                        <div class="h-64"><canvas id="chartHistorico"></canvas></div>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl">
+                        <h4 class="text-sm font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-gauge-high text-purple-500"></i> Métricas de Conversión Estratégica</h4>
+                        <div class="h-64"><canvas id="chartRendimiento"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section-campanias" class="space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">Estructura de Campañas</h2>
+                        <p class="text-sm text-slate-400">Estrategias macro, presupuestos y objetivos generales</p>
+                    </div>
+                    <button onclick="CampaniaUI.openModal()" class="bg-brand-blue text-white text-sm px-4 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all self-start sm:self-auto">
+                        <i class="fa-solid fa-plus"></i> Nueva Campaña
+                    </button>
+                </div>
+
+                <div class="flex flex-wrap gap-3 items-center bg-white dark:bg-[#1E293B] p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <input type="text" id="filterCampaniaSearch" oninput="CampaniaUI.render()" placeholder="Filtrar por nombre u objetivo..." class="flex-1 min-w-[200px] text-sm px-3 py-2 border rounded-xl dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue">
+                    <select id="filterCampaniaEstado" onchange="CampaniaUI.render()" class="text-sm px-3 py-2 border rounded-xl dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue">
+                        <option value="">Todos los Estados</option>
+                        <option value="Planificada">Planificada</option>
+                        <option value="Activa">Activa</option>
+                        <option value="Finalizada">Finalizada</option>
+                        <option value="Cancelada">Cancelada</option>
+                    </select>
+                </div>
+
+                <div id="campaniasContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    </div>
+            </section>
+
+            <section id="section-contenidos" class="space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">Producción de Contenidos</h2>
+                        <p class="text-sm text-slate-400">Micro-entregables específicos organizados por canal de comunicación</p>
+                    </div>
+                    <button onclick="ContenidoUI.openModal()" class="bg-brand-blue text-white text-sm px-4 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all self-start sm:self-auto">
+                        <i class="fa-solid fa-plus"></i> Crear Contenido
+                    </button>
+                </div>
+
+                <div class="flex flex-wrap gap-3 items-center bg-white dark:bg-[#1E293B] p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <input type="text" id="filterContenidoSearch" oninput="ContenidoUI.render()" placeholder="Buscar por título o responsable..." class="flex-1 min-w-[200px] text-sm px-3 py-2 border rounded-xl dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue">
+                    <select id="filterContenidoPlataforma" onchange="ContenidoUI.render()" class="text-sm px-3 py-2 border rounded-xl dark:bg-slate-900 border-slate-200 dark:border-slate-700-slate-700">
+                        <option value="">Todas las Plataformas</option>
+                        <option value="Facebook">Facebook</option>
+                        <option value="Instagram">Instagram</option>
+                        <option value="TikTok">TikTok</option>
+                        <option value="YouTube">YouTube</option>
+                        <option value="LinkedIn">LinkedIn</option>
+                        <option value="Blog">Blog</option>
+                        <option value="Email Marketing">Email Marketing</option>
+                    </select>
+                    <select id="filterContenidoEstado" onchange="ContenidoUI.render()" class="text-sm px-3 py-2 border rounded-xl dark:bg-slate-900 border-slate-200 dark:border-slate-700">
+                        <option value="">Todos los Estados</option>
+                        <option value="Borrador">Borrador</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Programado">Programado</option>
+                        <option value="Publicado">Publicado</option>
+                    </select>
+                </div>
+
+                <div class="bg-white dark:bg-[#1E293B] rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-400 text-[11px] font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                                    <th class="p-4">Título / Info</th>
+                                    <th class="p-4">Plataforma</th>
+                                    <th class="p-4">Responsable</th>
+                                    <th class="p-4">Programación</th>
+                                    <th class="p-4">Estado</th>
+                                    <th class="p-4 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contenidosTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section-calendario" class="space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">Calendario de Lanzamientos</h2>
+                        <p class="text-sm text-slate-400">Distribución de contenidos en cuadrícula temporal interactiva (Drag & Drop activo)</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 bg-white dark:bg-[#1E293B] p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 self-start sm:self-auto">
+                        <button onclick="CalendarioUI.prevMonth()" class="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-all"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+                        <span id="calendarMonthTitle" class="text-sm font-bold px-3 min-w-[120px] text-center">Junio 2026</span>
+                        <button onclick="CalendarioUI.nextMonth()" class="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-all"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+                        <div class="w-[1px] h-5 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                        <button onclick="CalendarioUI.goToday()" class="px-3 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">Hoy</button>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-[#1E293B] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                    <div class="grid grid-cols-7 text-center border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        <div>Dom</div>
+                        <div>Lun</div>
+                        <div>Mar</div>
+                        <div>Mié</div>
+                        <div>Jue</div>
+                        <div>Vie</div>
+                        <div>Sáb</div>
+                    </div>
+                    <div id="calendarDaysGrid" class="grid grid-cols-7 min-h-[600px] divide-x divide-y divide-slate-200 dark:divide-slate-800 border-t border-slate-200 dark:border-slate-800">
+                        </div>
+                </div>
+            </section>
+
+            <section id="section-reportes" class="space-y-6 hidden">
+                <div>
+                    <h2 class="text-2xl font-bold">Informe General del Negocio</h2>
+                    <p class="text-sm text-slate-400">Evaluación de Retorno de Inversión (ROI) y objetivos comerciales logrados</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-card p-6 rounded-2xl flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-brand-success flex items-center justify-center text-xl"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-semibold uppercase">Inversión Total Ejecutada</p>
+                            <h4 class="text-2xl font-bold" id="report-total-budget">$0.00</h4>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-brand-blue flex items-center justify-center text-xl"><i class="fa-solid fa-arrow-up-right-dots"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-semibold uppercase">Alcance Bruto Estimado</p>
+                            <h4 class="text-2xl font-bold">1.2M <span class="text-xs text-brand-success">+14%</span></h4>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center text-xl"><i class="fa-solid fa-pie-chart"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-semibold uppercase">ROI Global Promedio</p>
+                            <h4 class="text-2xl font-bold">3.4x</h4>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <div id="modalCampania" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-white dark:bg-[#1E293B] rounded-2xl w-full max-w-lg p-6 shadow-2xl border border-slate-200 dark:border-slate-700 transform scale-95 transition-all duration-300 overflow-y-auto max-h-[90vh]">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+                <h3 class="text-base font-bold flex items-center gap-2" id="modalCampaniaTitle"><i class="fa-solid fa-layer-group text-brand-blue"></i> Estructurar Campaña</h3>
+                <button onclick="CampaniaUI.closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form id="formCampania" onsubmit="CampaniaUI.handleSubmit(event)" class="space-y-4">
+                <input type="hidden" id="campaniaId">
+                
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-slate-400">Nombre de la Campaña *</label>
+                    <input type="text" id="campaniaNombre" required class="w-full text-sm px-3 py-2 border rounded-xl bg-transparent border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-slate-400">Objetivo Estratégico *</label>
+                    <input type="text" id="campaniaObjetivo" required placeholder="Ej: Aumentar Leads en 25%" class="w-full text-sm px-3 py-2 border rounded-xl bg-transparent border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-slate-400">Presupuesto (USD) *</label>
+                        <input type="number" id="campaniaPresupuesto" required min="0" step="0.01" class="w-full text-sm px-3 py-2 border rounded-xl bg-transparent border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-slate-400">Estado Inicial</label>
+                        <select id="campaniaEstado" class="w-full text-sm px-3 py-2 border rounded-xl bg-transparent border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue">
+                            <option value="Planificada">Planificada</option>
+                            <option value="Activa">Activa</option>
+                            <option value="Finalizada">Finalizada</option>
+                            <option value="Cancelada">Cancelada</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-slate-400">Fecha Lanzamiento *</label>
+                        <input type="date" id="campaniaFechaInicio" required class="w-full text-sm px-3 py-2 border rounded-xl bg-transparent border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-slate-400">Fecha Cierre *</label>
+                        <input type="date" id="campaniaFechaFin" required class="w-full text-sm px-3 py-2 border rounded-xl bg-transparent border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-slate-400">Descripción / Roadmap Breve</label>
+                    <textarea id="campaniaDescripcion" rows="3" class="w-full text-sm px-3 py-2 border rounded-xl bg-transparent border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue"></textarea>
+                </div>
+                
+                <div class="flex justify-end gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <button type="button" onclick="CampaniaUI.closeModal()" class="px-4 py-2 border rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-blue text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-all">Guardar Configuración</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalContenido" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-white dark:bg-[#1E293B] rounded-2xl w-full max-w-lg p-6 shadow-2xl border border-slate-200 dark:border-slate-700 transform scale-95 transition-all duration-300 overflow-y-auto max-h-[90vh]">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+                <h3 class="text-base font-bold flex items-center gap-2" id="modalContenidoTitle"><i class="fa-solid fa-photo-film text-brand-blue"></i> Planificar Entregable de Contenido</h3>
+                <button onclick="ContenidoUI.closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form id="formContenido" onsubmit="ContenidoUI.handleSubmit(event)" class="space-y-4">
+                <input type="hidden" id="contenidoId">
+                
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-slate-400">Título del Contenido / Copy Principal *</label>
+                    <input type="text" id="contenidoTitulo" required class="w-full text-sm px-3 py-2 border rounded-xl bg-transparent border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-slate-400">Canal / Plataforma</label>
+                        <select id="contenidoPlataforma" class="w-full text-sm px-3 py-2 border rounded-xl bg-transparent border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue">
+                            <option value="Facebook">Facebook</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="TikTok">TikTok</option>
+                            <option value="YouTube">YouTube</option>
+                            <option value="LinkedIn">LinkedIn</option>
+                            <option value="Blog">Blog</option>
+                            <option value="Email Marketing">Email Marketing</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-slate-400">Responsable / Content Specialist *</label>
+                        <input type="text" id="contenidoResponsable" required class="w-full text-sm px-3 py-2 border rounded-xl bg-transparent border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-slate-400">Fecha Publicación *</label>
+                        <input type="date" id="contenidoFecha" required class="w-full text-sm px-3 py-2 border rounded-xl bg-transparent border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-slate-400">Hora *</label>
+                        <input type="time" id="contenidoHora" required class="w-full text-sm px-3 py-2 border rounded-xl bg-transparent border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-slate-400">Estado Workflow</label>
+                    <select id="contenidoEstado" class="w-full text-sm px-3 py-2 border rounded-xl bg-transparent border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue">
+                        <option value="Borrador">Borrador</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Programado">Programado</option>
+                        <option value="Publicado">Publicado</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-slate-400">Instrucciones de Diseño / Enlaces de Multimedia</label>
+                    <textarea id="contenidoDescripcion" rows="3" placeholder="Detalles de la pieza gráfica o audiovisual..." class="w-full text-sm px-3 py-2 border rounded-xl bg-transparent border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-blue"></textarea>
+                </div>
+                
+                <div class="flex justify-end gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <button type="button" onclick="ContenidoUI.closeModal()" class="px-4 py-2 border rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-blue text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-all">Asignar Lanzamiento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fixed bottom-5 right-5 space-y-2 z-50 pointer-events-none"></div>
+
+    <script>
+        /**
+         * CAPA DE ALMACENAMIENTO DE DATOS (REPOSITORIO LOCALSTORAGE)
+         */
+        const Storage = {
+            get(key, defaultValue = []) {
+                const data = localStorage.getItem(`mkt_pro_${key}`);
+                return data ? JSON.parse(data) : defaultValue;
+            },
+            set(key, value) {
+                localStorage.setItem(`mkt_pro_${key}`, JSON.stringify(value));
+            }
+        };
+
+        // Generador de base inicial de datos si está vacío
+        const MockData = {
+            init() {
+                if(Storage.get('campanias').length === 0) {
+                    Storage.set('campanias', [
+                        { id: 101, nombre: 'Lanzamiento Colección Primavera', objetivo: 'Incrementar ventas 35%', presupuesto: 4500, fechaInicio: '2026-06-01', fechaFin: '2026-06-30', estado: 'Activa', descripcion: 'Estrategia de Ads multiplataforma con influencers locales.' },
+                        { id: 102, nombre: 'Campaña Agro-Premium Mango VRAEM', objetivo: 'Posicionar marca país', presupuesto: 8000, fechaInicio: '2026-07-05', fechaFin: '2026-08-20', estado: 'Planificada', descripcion: 'Foco B2B exportación.' }
+                    ]);
+                }
+                if(Storage.get('contenidos').length === 0) {
+                    Storage.set('contenidos', [
+                        { id: 1, titulo: 'Teaser de Colección - Video Corto', plataforma: 'TikTok', responsable: 'Carlos Mendoza', fecha: '2026-06-02', hora: '18:00', estado: 'Programado', descripcion: 'Uso de audio en tendencia.' },
+                        { id: 2, titulo: 'Infografía Beneficios Orgánicos', plataforma: 'Instagram', responsable: 'Ana Torres', fecha: '2026-06-02', hora: '10:00', estado: 'Publicado', descripcion: 'Carrusel de 3 slides.' },
+                        { id: 3, titulo: 'Newsletter Promocional Suscriptores', plataforma: 'Email Marketing', responsable: 'Lic. Juan Pérez', fecha: '2026-06-15', hora: '09:00', estado: 'Borrador', descripcion: 'Cupón de descuento del 15%.' },
+                        { id: 4, titulo: 'Anuncio Reel - Descuentos Especiales', plataforma: 'Instagram', responsable: 'Ana Torres', fecha: '2026-06-10', hora: '15:30', estado: 'Pendiente', descripcion: 'Reel de producto en stock.' },
+                        { id: 5, titulo: 'Post Corporativo Lanzamiento', plataforma: 'LinkedIn', responsable: 'Lic. Juan Pérez', fecha: '2026-06-22', hora: '11:00', estado: 'Programado', descripcion: 'Comunicado oficial institucional.' }
+                    ]);
+                }
+            }
+        };
+
+        /**
+         * MANAGER GENERAL DE LA APLICACIÓN Y CONTROLADORES GLOBALES
+         */
+        const App = {
+            currentSection: 'dashboard',
+            globalQuery: '',
+
+            init() {
+                MockData.init();
+                this.loadTheme();
+                this.switchSection('dashboard');
+                DashboardUI.render();
+                
+                // Drag and drop event listeners globales para el documento
+                document.addEventListener("dragover", function(event) { event.preventDefault(); });
+            },
+
+            switchSection(sectionId) {
+                this.currentSection = sectionId;
+                
+                // Cambiar visibilidad de paneles HTML
+                ['dashboard', 'campanias', 'contenidos', 'calendario', 'reportes'].forEach(sec => {
+                    const el = document.getElementById(`section-${sec}`);
+                    if(el) el.classList.add('hidden');
+                    
+                    const navBtn = document.getElementById(`nav-${sec}`);
+                    if(navBtn) {
+                        navBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800";
+                    }
+                });
+
+                document.getElementById(`section-${sectionId}`).classList.remove('hidden');
+                
+                const activeNav = document.getElementById(`nav-${sectionId}`);
+                if(activeNav) {
+                    activeNav.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all bg-brand-blue text-white shadow-lg shadow-blue-500/10";
+                }
+
+                // Renderizadores específicos al cambiar de pantalla
+                if(sectionId === 'dashboard') DashboardUI.render();
+                if(sectionId === 'campanias') CampaniaUI.render();
+                if(sectionId === 'contenidos') ContenidoUI.render();
+                if(sectionId === 'calendario') CalendarioUI.render();
+                if(sectionId === 'reportes') this.renderReportesSummary();
+                
+                // Ocultar barra lateral en móvil al navegar
+                if(window.innerWidth < 1024) this.toggleSidebar(false);
+            },
+
+            toggleSidebar(force = null) {
+                const sidebar = document.getElementById('sidebar');
+                if(force !== null) {
+                    if(force) sidebar.classList.remove('-translate-x-full');
+                    else sidebar.classList.add('-translate-x-full');
+                } else {
+                    sidebar.classList.toggle('-translate-x-full');
+                }
+            },
+
+            toggleTheme() {
+                const isDark = document.documentElement.classList.toggle('dark');
+                Storage.set('theme', isDark ? 'dark' : 'light');
+                if(this.currentSection === 'dashboard') DashboardUI.render(); // Refrescar gráficos con los colores de tema adecuados
+            },
+
+            loadTheme() {
+                const savedTheme = Storage.get('theme', 'light');
+                if(savedTheme === 'dark') document.documentElement.classList.add('dark');
+                else document.documentElement.classList.remove('dark');
+            },
+
+            toast(message, type = 'success') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                const colors = {
+                    success: 'bg-emerald-500 text-white',
+                    danger: 'bg-rose-500 text-white',
+                    warning: 'bg-amber-500 text-slate-900'
+                };
+                toast.className = `${colors[type]} px-4 py-2.5 rounded-xl text-xs font-semibold shadow-xl flex items-center gap-2 animate-bounce transition-all duration-300 pointer-events-auto`;
+                toast.innerHTML = `<i class="fa-solid ${type==='success'?'fa-circle-check':type==='danger'?'fa-triangle-exclamation':'fa-info-circle'}"></i> ${message}`;
+                container.appendChild(toast);
+                setTimeout(() => { toast.remove(); }, 3500);
+            },
+
+            handleGlobalSearch(value) {
+                this.globalQuery = value.toLowerCase().trim();
+                if(this.currentSection === 'campanias') CampaniaUI.render();
+                if(this.currentSection === 'contenidos') ContenidoUI.render();
+            },
+
+            renderReportesSummary() {
+                const campanias = Storage.get('campanias');
+                const totalBudget = campanias.reduce((acc, curr) => acc + parseFloat(curr.presupuesto || 0), 0);
+                document.getElementById('report-total-budget').innerText = `$${totalBudget.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            },
+
+            exportToExcel() {
+                const contenidos = Storage.get('contenidos');
+                let csvContent = "data:text/csv;charset=utf-8,ID,Titulo,Plataforma,Responsable,Fecha,Hora,Estado\n";
+                contenidos.forEach(c => {
+                    csvContent += `${c.id},"${c.titulo}","${c.plataforma}","${c.responsable}",${c.fecha},${c.hora},${c.estado}\n`;
+                });
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `Reporte_Contenidos_Marketing_${new Date().toISOString().slice(0,10)}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                this.toast("Exportación de datos de contenidos completada.");
+            }
+        };
+
+        /**
+         * MÓDULO INTERFAZ Y LOGICA CRUD: CAMPAÑAS
+         */
+        const CampaniaUI = {
+            openModal(id = null) {
+                const modal = document.getElementById('modalCampania');
+                const form = document.getElementById('formCampania');
+                form.reset();
+                document.getElementById('campaniaId').value = '';
+                document.getElementById('modalCampaniaTitle').innerHTML = id ? '<i class="fa-solid fa-pen-to-square text-brand-blue"></i> Actualizar Campaña' : '<i class="fa-solid fa-layer-group text-brand-blue"></i> Estructurar Campaña';
+                
+                if(id) {
+                    const campanias = Storage.get('campanias');
+                    const c = campanias.find(item => item.id === parseInt(id));
+                    if(c) {
+                        document.getElementById('campaniaId').value = c.id;
+                        document.getElementById('campaniaNombre').value = c.nombre;
+                        document.getElementById('campaniaObjetivo').value = c.objetivo;
+                        document.getElementById('campaniaPresupuesto').value = c.presupuesto;
+                        document.getElementById('campaniaEstado').value = c.estado;
+                        document.getElementById('campaniaFechaInicio').value = c.fechaInicio;
+                        document.getElementById('campaniaFechaFin').value = c.fechaFin;
+                        document.getElementById('campaniaDescripcion').value = c.descripcion;
+                    }
+                }
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.children[0].classList.remove('scale-95');
+            },
+
+            closeModal() {
+                const modal = document.getElementById('modalCampania');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modal.children[0].classList.add('scale-95');
+            },
+
+            handleSubmit(e) {
+                e.preventDefault();
+                let campanias = Storage.get('campanias');
+                const id = document.getElementById('campaniaId').value;
+                
+                const data = {
+                    id: id ? parseInt(id) : Date.now(),
+                    nombre: document.getElementById('campaniaNombre').value,
+                    objetivo: document.getElementById('campaniaObjetivo').value,
+                    presupuesto: parseFloat(document.getElementById('campaniaPresupuesto').value),
+                    estado: document.getElementById('campaniaEstado').value,
+                    fechaInicio: document.getElementById('campaniaFechaInicio').value,
+                    fechaFin: document.getElementById('campaniaFechaFin').value,
+                    descripcion: document.getElementById('campaniaDescripcion').value
+                };
+
+                if(id) {
+                    campanias = campanias.map(c => c.id === data.id ? data : c);
+                    App.toast("Campaña optimizada y actualizada con éxito.");
+                } else {
+                    campanias.push(data);
+                    App.toast("Nueva planificación de campaña insertada.");
+                }
+
+                Storage.set('campanias', campanias);
+                this.closeModal();
+                this.render();
+            },
+
+            delete(id) {
+                if(confirm("¿Está completamente seguro de remover esta campaña de marketing del ecosistema? Se perderá la trazabilidad.")) {
+                    let campanias = Storage.get('campanias');
+                    campanias = campanias.filter(c => c.id !== parseInt(id));
+                    Storage.set('campanias', campanias);
+                    App.toast("Campaña eliminada permanentemente.", "danger");
+                    this.render();
+                }
+            },
+
+            render() {
+                const container = document.getElementById('campaniasContainer');
+                const searchVal = document.getElementById('filterCampaniaSearch').value.toLowerCase();
+                const estadoVal = document.getElementById('filterCampaniaEstado').value;
+                let campanias = Storage.get('campanias');
+
+                container.innerHTML = '';
+
+                // Aplicación de Filtros cruzados
+                campanias = campanias.filter(c => {
+                    const matchesSearch = c.nombre.toLowerCase().includes(searchVal) || c.objetivo.toLowerCase().includes(searchVal) || (App.globalQuery && c.nombre.toLowerCase().includes(App.globalQuery));
+                    const matchesEstado = estadoVal === "" || c.estado === estadoVal;
+                    return matchesSearch && matchesEstado;
+                });
+
+                if(campanias.length === 0) {
+                    container.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 text-sm">No se encontraron estructuras de campañas activas bajo los filtros seleccionados.</div>`;
+                    return;
+                }
+
+                campanias.forEach(c => {
+                    const badgeColor = c.estado === 'Activa' ? 'bg-emerald-500/10 text-brand-success' : c.estado === 'Planificada' ? 'bg-blue-500/10 text-brand-blue' : c.estado === 'Finalizada' ? 'bg-slate-500/10 text-slate-500' : 'bg-rose-500/10 text-brand-danger';
+                    
+                    const card = document.createElement('div');
+                    card.className = "glass-card p-5 rounded-2xl flex flex-col justify-between relative group hover:shadow-lg transition-all duration-300";
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${badgeColor}">${c.estado}</span>
+                                <span class="text-xs font-bold text-slate-400">ID: #${c.id}</span>
+                            </div>
+                            <h3 class="font-bold text-base mb-1 group-hover:text-brand-blue transition-colors">${c.nombre}</h3>
+                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3"><i class="fa-solid fa-bullseye text-slate-400 mr-1"></i> ${c.objetivo}</p>
+                            <p class="text-xs text-slate-400 line-clamp-2 mb-4">${c.descripcion || 'Sin descripción adicional.'}</p>
+                        </div>
+                        <div class="border-t border-slate-100 dark:border-slate-800 pt-3 mt-2 flex items-center justify-between">
+                            <div>
+                                <p class="text-[10px] text-slate-400 uppercase font-semibold">Presupuesto Asignado</p>
+                                <p class="text-sm font-bold">$${parseFloat(c.presupuesto).toLocaleString('en-US')}</p>
+                            </div>
+                            <div class="flex gap-1">
+                                <button onclick="CampaniaUI.openModal(${c.id})" class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-brand-blue hover:text-white flex items-center justify-center text-xs transition-all"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="CampaniaUI.delete(${c.id})" class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-brand-danger hover:text-white flex items-center justify-center text-xs transition-all"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        };
+
+        /**
+         * MÓDULO INTERFAZ Y LOGICA CRUD: PIEZAS DE CONTENIDO
+         */
+        const ContenidoUI = {
+            openModal(id = null, defaultDate = null) {
+                const modal = document.getElementById('modalContenido');
+                const form = document.getElementById('formContenido');
+                form.reset();
+                document.getElementById('contenidoId').value = '';
+                document.getElementById('modalContenidoTitle').innerHTML = id ? '<i class="fa-solid fa-pen-to-square text-brand-blue"></i> Modificar Contenido' : '<i class="fa-solid fa-photo-film text-brand-blue"></i> Planificar Entregable de Contenido';
+                
+                if(defaultDate) {
+                    document.getElementById('contenidoFecha').value = defaultDate;
+                    document.getElementById('contenidoHora').value = "12:00";
+                }
+
+                if(id) {
+                    const contenidos = Storage.get('contenidos');
+                    const c = contenidos.find(item => item.id === parseInt(id));
+                    if(c) {
+                        document.getElementById('contenidoId').value = c.id;
+                        document.getElementById('contenidoTitulo').value = c.titulo;
+                        document.getElementById('contenidoPlataforma').value = c.plataforma;
+                        document.getElementById('contenidoResponsable').value = c.responsable;
+                        document.getElementById('contenidoFecha').value = c.fecha;
+                        document.getElementById('contenidoHora').value = c.hora;
+                        document.getElementById('contenidoEstado').value = c.estado;
+                        document.getElementById('contenidoDescripcion').value = c.descripcion;
+                    }
+                }
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.children[0].classList.remove('scale-95');
+            },
+
+            closeModal() {
+                const modal = document.getElementById('modalContenido');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modal.children[0].classList.add('scale-95');
+            },
+
+            handleSubmit(e) {
+                e.preventDefault();
+                let contenidos = Storage.get('contenidos');
+                const id = document.getElementById('contenidoId').value;
+
+                const data = {
+                    id: id ? parseInt(id) : Date.now(),
+                    titulo: document.getElementById('contenidoTitulo').value,
+                    plataforma: document.getElementById('contenidoPlataforma').value,
+                    responsable: document.getElementById('contenidoResponsable').value,
+                    fecha: document.getElementById('contenidoFecha').value,
+                    hora: document.getElementById('contenidoHora').value,
+                    estado: document.getElementById('contenidoEstado').value,
+                    descripcion: document.getElementById('contenidoDescripcion').value
+                };
+
+                if(id) {
+                    contenidos = contenidos.map(c => c.id === data.id ? data : c);
+                    App.toast("Estrategia de contenido modificada.");
+                } else {
+                    contenidos.push(data);
+                    App.toast("Nuevo registro de pieza asignado.");
+                }
+
+                Storage.set('contenidos', contenidos);
+                this.closeModal();
+                this.render();
+            },
+
+            delete(id) {
+                if(confirm("¿Eliminar este contenido? Desaparecerá de la parrilla de programación del calendario.")) {
+                    let contenidos = Storage.get('contenidos');
+                    contenidos = contenidos.filter(c => c.id !== parseInt(id));
+                    Storage.set('contenidos', contenidos);
+                    App.toast("Pieza removida de los canales.", "danger");
+                    this.render();
+                }
+            },
+
+            render() {
+                const tbody = document.getElementById('contenidosTableBody');
+                const searchVal = document.getElementById('filterContenidoSearch').value.toLowerCase();
+                const plataformaVal = document.getElementById('filterContenidoPlataforma').value;
+                const estadoVal = document.getElementById('filterContenidoEstado').value;
+                let contenidos = Storage.get('contenidos');
+
+                tbody.innerHTML = '';
+
+                contenidos = contenidos.filter(c => {
+                    const matchesSearch = c.titulo.toLowerCase().includes(searchVal) || c.responsable.toLowerCase().includes(searchVal) || (App.globalQuery && c.titulo.toLowerCase().includes(App.globalQuery));
+                    const matchesPlat = plataformaVal === "" || c.plataforma === plataformaVal;
+                    const matchesEst = estadoVal === "" || c.estado === estadoVal;
+                    return matchesSearch && matchesPlat && matchesEst;
+                });
+
+                if(contenidos.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 text-xs">No se registran contenidos que coincidan con la parametrización de búsqueda.</td></tr>`;
+                    return;
+                }
+
+                contenidos.forEach(c => {
+                    const pillColor = c.estado === 'Publicado' ? 'bg-emerald-500/10 text-brand-success' : c.estado === 'Programado' ? 'bg-blue-500/10 text-brand-blue' : c.estado === 'Borrador' ? 'bg-slate-500/10 text-slate-500' : 'bg-amber-500/10 text-brand-warning';
+                    
+                    const platformClasses = {
+                        'Facebook': 'bg-blue-600 text-white',
+                        'Instagram': 'bg-gradient-to-r from-purple-500 to-pink-500 text-white',
+                        'TikTok': 'bg-black text-white dark:bg-white dark:text-black',
+                        'YouTube': 'bg-red-600 text-white',
+                        'LinkedIn': 'bg-blue-800 text-white',
+                        'Blog': 'bg-emerald-600 text-white',
+                        'Email Marketing': 'bg-amber-500 text-slate-900'
+                    };
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-all";
+                    tr.innerHTML = `
+                        <td class="p-4">
+                            <p class="font-bold text-slate-900 dark:text-white">${c.titulo}</p>
+                            <span class="text-[10px] text-slate-400 block max-w-xs truncate">${c.descripcion || 'Sin especificaciones técnicas.'}</span>
+                        </td>
+                        <td class="p-4">
+                            <span class="text-[10px] font-bold px-2 py-1 rounded-md ${platformClasses[c.plataforma] || 'bg-slate-500 text-white'}">${c.plataforma}</span>
+                        </td>
+                        <td class="p-4 text-xs font-medium text-slate-600 dark:text-slate-300">${c.responsable}</td>
+                        <td class="p-4 text-xs">
+                            <p class="font-semibold text-slate-700 dark:text-slate-300"><i class="fa-regular fa-calendar mr-1 text-slate-400"></i> ${c.fecha}</p>
+                            <p class="text-[10px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i> ${c.hora} hrs</p>
+                        </td>
+                        <td class="p-4">
+                            <span class="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full ${pillColor}">${c.estado}</span>
+                        </td>
+                        <td class="p-4 text-right">
+                            <div class="flex gap-1 justify-end">
+                                <button onclick="ContenidoUI.openModal(${c.id})" class="w-7 h-7 rounded-lg text-slate-500 hover:text-brand-blue border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs transition-all"><i class="fa-solid fa-pencil"></i></button>
+                                <button onclick="ContenidoUI.delete(${c.id})" class="w-7 h-7 rounded-lg text-slate-500 hover:text-brand-danger border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs transition-all"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        };
+
+        /**
+         * MÓDULO INTERFAZ: CALENDARIO INTERACTIVO AVANZADO
+         */
+        const CalendarioUI = {
+            currentDate: new Date(2026, 5, 1), // Inicializar por defecto en Junio 2026 para calzar con MockData
+
+            monthsNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+
+            prevMonth() {
+                this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+                this.render();
+            },
+
+            nextMonth() {
+                this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+                this.render();
+            },
+
+            goToday() {
+                this.currentDate = new Date();
+                this.render();
+            },
+
+            render() {
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                
+                document.getElementById('calendarMonthTitle').innerText = `${this.monthsNames[month]} ${year}`;
+                
+                const grid = document.getElementById('calendarDaysGrid');
+                grid.innerHTML = '';
+
+                const firstDayIndex = new Date(year, month, 1).getDay();
+                const lastDayDate = new Date(year, month + 1, 0).getDate();
+                const prevLastDayDate = new Date(year, month, 0).getDate();
+
+                const contenidos = Storage.get('contenidos');
+
+                // Renderizado de días del mes anterior (Relleno gris óptico)
+                for (let i = firstDayIndex; i > 0; i--) {
+                    const dayNum = prevLastDayDate - i + 1;
+                    grid.appendChild(this.createDayCell(dayNum, false, true, year, month - 1));
+                }
+
+                // Renderizado de días del mes en curso
+                for (let day = 1; day <= lastDayDate; day++) {
+                    const isToday = new Date().getDate() === day && new Date().getMonth() === month && new Date().getFullYear() === year;
+                    
+                    // Filtrar piezas asignadas a esta fecha exacta
+                    const currentStringDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const dayContents = contenidos.filter(c => c.fecha === currentStringDate);
+
+                    grid.appendChild(this.createDayCell(day, true, isToday, year, month, dayContents));
+                }
+
+                // Renderizado de días faltantes del mes posterior para cuadrar la grilla perfecta
+                const totalCells = firstDayIndex + lastDayDate;
+                const nextDaysNeeded = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+                for (let j = 1; j <= nextDaysNeeded; j++) {
+                    grid.appendChild(this.createDayCell(j, false, false, year, month + 1));
+                }
+            },
+
+            createDayCell(dayNum, isCurrentMonth, isSpecial, year, month, contents = []) {
+                const cell = document.createElement('div');
+                const padMonth = String(month + 1).padStart(2, '0');
+                const padDay = String(dayNum).padStart(2, '0');
+                const dateISO = `${year}-${padMonth}-${padDay}`;
+
+                cell.className = `calendar-day p-2 min-h-[110px] flex flex-col justify-between bg-white dark:bg-[#1E293B] relative group transition-all duration-200 ${!isCurrentMonth ? 'bg-slate-50/50 dark:bg-slate-900/10 opacity-40' : ''}`;
+                cell.setAttribute('data-date', dateISO);
+
+                // Configuración de eventos para soporte nativo Drag & Drop
+                if(isCurrentMonth) {
+                    cell.addEventListener('dragover', (e) => { e.preventDefault(); cell.classList.add('drag-over'); });
+                    cell.addEventListener('dragleave', () => cell.classList.remove('drag-over'));
+                    cell.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        cell.classList.remove('drag-over');
+                        const contenidoId = e.dataTransfer.getData("text/plain");
+                        if(contenidoId) {
+                            let contenidos = Storage.get('contenidos');
+                            contenidos = contenidos.map(item => {
+                                if(item.id === parseInt(contenidoId)) {
+                                    item.fecha = cell.getAttribute('data-date');
+                                    App.toast(`Contenido reprogramado al ${item.fecha}`);
+                                }
+                                return item;
+                            });
+                            Storage.set('contenidos', contenidos);
+                            CalendarioUI.render();
+                        }
+                    });
+                }
+
+                // Render cabecera del día
+                let dayHeaderHtml = `
+                    <div class="flex items-center justify-between">
+                        <span class="w-6 h-6 flex items-center justify-center font-bold text-xs rounded-full ${isSpecial && isCurrentMonth ? 'bg-brand-blue text-white shadow-md' : 'text-slate-700 dark:text-slate-300'}">${dayNum}</span>
+                        ${contents.length > 0 ? `<span class="text-[9px] bg-slate-100 dark:bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded-md font-bold">${contents.length} piezas</span>` : ''}
+                    </div>
+                `;
+
+                // Render lista de contenidos embebidos
+                let contentsHtml = `<div class="space-y-1 mt-2 overflow-y-auto max-h-[75px]">`;
+                
+                const platformColors = {
+                    'Facebook': 'bg-blue-600',
+                    'Instagram': 'bg-purple-600',
+                    'TikTok': 'bg-black dark:bg-slate-700',
+                    'YouTube': 'bg-red-600',
+                    'LinkedIn': 'bg-cyan-700',
+                    'Blog': 'bg-emerald-600',
+                    'Email Marketing': 'bg-amber-500'
+                };
+
+                contents.forEach(c => {
+                    contentsHtml += `
+                        <div draggable="true" ondragstart="event.dataTransfer.setData('text/plain', ${c.id})" onclick="event.stopPropagation(); ContenidoUI.openModal(${c.id})" title="${c.titulo} (${c.hora} hrs)" class="text-[10px] text-white truncate px-1.5 py-0.5 rounded font-medium cursor-pointer shadow-sm ${platformColors[c.plataforma] || 'bg-slate-500'} hover:opacity-80 transition-opacity">
+                            ${c.hora} ${c.titulo}
+                        </div>
+                    `;
+                });
+                contentsHtml += `</div>`;
+
+                // Botón invisible que aparece en Hover para creación veloz
+                let hoverActionHtml = isCurrentMonth ? `
+                    <button onclick="ContenidoUI.openModal(null, '${dateISO}')" class="absolute bottom-1 right-1 w-5 h-5 bg-slate-900 text-white rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg text-[10px]"><i class="fa-solid fa-plus"></i></button>
+                ` : '';
+
+                cell.innerHTML = `<div>${dayHeaderHtml}${contentsHtml}</div>${hoverActionHtml}`;
+                return cell;
+            }
+        };
+
+        /**
+         * MÓDULO INTERFAZ: INTEGRACIÓN DE DASHBOARD Y GRÁFICOS DINÁMICOS (CHART.JS)
+         */
+        const DashboardUI = {
+            chartsInstances: {},
+
+            render() {
+                const campanias = Storage.get('campanias');
+                const contenidos = Storage.get('contenidos');
+
+                // Procesamiento e inyección de Contadores KPIs básicos
+                document.getElementById('kpi-total-campanias').innerText = campanias.length;
+                document.getElementById('kpi-activas-campanias').innerText = campanias.filter(c => c.estado === 'Activa').length;
+                document.getElementById('kpi-total-contenidos').innerText = contenidos.length;
+                document.getElementById('kpi-publicados-contenidos').innerText = contenidos.filter(c => c.estado === 'Publicado').length;
+                document.getElementById('kpi-programados-contenidos').innerText = contenidos.filter(c => c.estado === 'Programado').length;
+
+                this.renderCharts(contenidos);
+            },
+
+            renderCharts(contenidos) {
+                const isDark = document.documentElement.classList.contains('dark');
+                const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)';
+                const labelColor = isDark ? '#94A3B8' : '#64748B';
+
+                // Destruir gráficos previos si existen para evitar solapamientos visuales
+                Object.keys(this.chartsInstances).forEach(key => {
+                    if (this.chartsInstances[key]) this.chartsInstances[key].destroy();
+                });
+
+                // 1. Gráfico de barras: Contenidos por plataforma
+                const plataformasCtx = document.getElementById('chartPlataformas').getContext('2d');
+                const platCounts = { Facebook: 0, Instagram: 0, TikTok: 0, YouTube: 0, LinkedIn: 0, Blog: 0, 'Email Marketing': 0 };
+                contenidos.forEach(c => { if(platCounts[c.plataforma] !== undefined) platCounts[c.plataforma]++; });
+
+                this.chartsInstances.plataformas = new Chart(plataformasCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(platCounts),
+                        datasets: [{
+                            label: 'Volumen de Piezas',
+                            data: Object.values(platCounts),
+                            backgroundColor: ['#1877F2', '#E1306C', '#2563EB', '#FF0000', '#0077B5', '#10B981', '#F59E0B'],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: labelColor } },
+                            y: { grid: { color: gridColor }, ticks: { color: labelColor, stepSize: 1 } }
+                        }
+                    }
+                });
+
+                // 2. Gráfico circular: Distribución por Estado
+                const estadosCtx = document.getElementById('chartEstados').getContext('2d');
+                const estCounts = { Borrador: 0, Pendiente: 0, Programado: 0, Publicado: 0 };
+                contenidos.forEach(c => { if(estCounts[c.estado] !== undefined) estCounts[c.estado]++; });
+
+                this.chartsInstances.estados = new Chart(estadosCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(estCounts),
+                        datasets: [{
+                            data: Object.values(estCounts),
+                            backgroundColor: ['#64748B', '#F59E0B', '#2563EB', '#10B981'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: { color: labelColor, font: { size: 11 } } } }
+                    }
+                });
+
+                // 3. Gráfico de Línea Temporal (Falso Histórico de Publicaciones)
+                const historicoCtx = document.getElementById('chartHistorico').getContext('2d');
+                this.chartsInstances.historico = new Chart(historicoCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Publicaciones Realizadas',
+                            data: [12, 19, 15, 28, 22, contenidos.length],
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: labelColor } },
+                            y: { grid: { color: gridColor }, ticks: { color: labelColor } }
+                        }
+                    }
+                });
+
+                // 4. Radar / Barras Agrupadas: Rendimiento del Embudo
+                const rendimientoCtx = document.getElementById('chartRendimiento').getContext('2d');
+                this.chartsInstances.rendimiento = new Chart(rendimientoCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Alcance (x10k)', 'Interacción (x1k)', 'Conversión (x100)', 'ROI % (x10)'],
+                        datasets: [
+                            { label: 'Q1 Objetivo', data: [45, 30, 25, 40], backgroundColor: 'rgba(148, 163, 184, 0.3)' },
+                            { label: 'Q2 Actual', data: [58, 42, 38, 52], backgroundColor: '#2563EB' }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: labelColor } } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: labelColor } },
+                            y: { grid: { color: gridColor }, ticks: { color: labelColor } }
+                        }
+                    }
+                });
+            }
+        };
+
+        // INICIALIZACIÓN AUTOMÁTICA AL CARGAR EL ÁRBOL DOM
+        window.addEventListener('DOMContentLoaded', () => { App.init(); });
+    </script>
+</body>
+</html>
